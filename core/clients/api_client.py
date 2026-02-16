@@ -1,5 +1,6 @@
 import requests
 import os
+import jsonschema
 from dotenv import load_dotenv
 from core.settings.environments import Environment
 from core.clients.endpoints import Endpoints
@@ -66,25 +67,17 @@ class APIClient():
         with allure.step("Обновляем хэдер авторизации"):
             self.session.headers.update({"Authorization": f"Bearer {token}"})
 
-    def get_booking_by_id(self):
+    def get_booking_by_id(self, booking_id : int):
+
         with allure.step("Делаем запрос для получения информации по id"):
-            url = f"{self.base_url}{Endpoints.BOOKING_ENDPOINT}{Ids.ID}"
-            response = requests.get(url, headers={"Accept": "application/json"}, timeout=Timeouts.TIMEOUT)
+            url = f"{self.base_url}{Endpoints.BOOKING_ENDPOINT}{booking_id}"
+            response = self.session.get(url, headers={"Accept": "application/json"}, timeout=Timeouts.TIMEOUT)
         with allure.step("Проверка статус-кода ответа"):
             assert response.status_code == 200, f"Ожидали код ответа 200, а получили {response.status_code}"
-        with allure.step("Проверка, что в боди ответа JSON объект"):
-            body = response.json()
-            assert isinstance(body, dict)
-        with allure.step("Проверка, что объект в ответе содержит нужные поля"):
-            expected_keys = {
-                "firstname",
-                "lastname",
-                "totalprice",
-                "depositpaid"
-            }
-            assert expected_keys.issubset(body.keys())
         with allure.step("Проверка ответа на соответствие схеме"):
+            response_json = response.json()
             jsonschema.validate(response_json, BOOKING_SCHEMA)
+
 
 
 
