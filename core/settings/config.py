@@ -6,6 +6,3 @@ class Users(Enum):
 
 class Timeouts(Enum):
     TIMEOUT = 5
-
-class Ids(Enum):
-    ID = 1

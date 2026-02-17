@@ -4,7 +4,7 @@ import jsonschema
 from dotenv import load_dotenv
 from core.settings.environments import Environment
 from core.clients.endpoints import Endpoints
-from core.settings.config import Users, Timeouts, Ids
+from core.settings.config import Users, Timeouts
 from core.schemas.booking_schema import BOOKING_SCHEMA
 import allure
 
@@ -21,7 +21,8 @@ class APIClient():
         self.base_url = self.get_base_url(environment)
         self.session = requests.Session()
         self.session.headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
 
     def get_base_url(self, environment: Environment) -> str:
@@ -71,7 +72,7 @@ class APIClient():
 
         with allure.step("Делаем запрос для получения информации по id"):
             url = f"{self.base_url}{Endpoints.BOOKING_ENDPOINT}{booking_id}"
-            response = self.session.get(url, headers={"Accept": "application/json"}, timeout=Timeouts.TIMEOUT)
+            response = self.session.get(url, timeout=Timeouts.TIMEOUT)
         with allure.step("Проверка статус-кода ответа"):
             assert response.status_code == 200, f"Ожидали код ответа 200, а получили {response.status_code}"
         with allure.step("Проверка ответа на соответствие схеме"):
